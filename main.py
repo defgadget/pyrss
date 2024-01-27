@@ -1,7 +1,8 @@
 import csv
 import os
-import sys
 import argparse
+import requests 
+import xml.etree.ElementTree as ET
 
 def save_to_csv(filename, data):
     exists = os.path.isfile(filename)
@@ -19,6 +20,37 @@ def read_from_csv(filename):
         for row in r:
             print(", ".join(row))
             
+def fetch_rss_feed(url: str) -> str:
+    r = requests.get(url)
+    if r.status_code == 200:
+        print("Success")
+        return r.text
+    else:
+        print("Failed")
+        return ""
+
+def parse_rss_xml(content: str) -> None:
+    root = ET.fromstring(content)
+
+    newsfeeds = {}
+    title = root.findtext("./channel/title")
+    newsfeeds[title] = []
+    for item in root.findall("./channel/item"):
+        newsfeed = {}
+        for child in item:
+            newsfeed[child.tag] = child.text
+        newsfeeds[title].append(newsfeed)
+    for nf in newsfeeds[title]:
+        if "title" in nf:
+            print(nf["title"])
+        if "description" in nf:
+            print(nf["description"])
+        if "guid" in nf:
+            print(nf["guid"])
+        if "pubDate" in nf:
+            print(nf["pubDate"])
+        print()
+
 
 def main():
     parser = argparse.ArgumentParser(description="PyRSS Manager")
@@ -37,5 +69,7 @@ def main():
         print("Unknow action")
         return
 
+
 if __name__ == "__main__":
-    main()
+    content = fetch_rss_feed("https://www.rssboard.org/files/sample-rss-2.xml")
+    parse_rss_xml(content)
