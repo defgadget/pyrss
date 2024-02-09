@@ -1,6 +1,5 @@
 import csv
 import os
-import argparse
 import requests 
 import xml.etree.ElementTree as ET
 
@@ -13,14 +12,19 @@ def save_to_csv(filename, data):
             w.writerow(header)
         w.writerow(data)
 
-def read_from_csv(filename):
+def read_from_csv(filename) -> list[str]:
+    feed_list = []
     with open(filename, newline="") as csvfile:
         r = csv.reader(csvfile)
         r.__next__()
-        for row in r:
-            print(", ".join(row))
+        for feeds in r:
+            for feed in feeds:
+                feed_list.append(feed)
+    return feed_list
             
 def fetch_rss_feed(url: str) -> str:
+    if url == "":
+        return ""
     r = requests.get(url)
     if r.status_code == 200:
         print("Success")
@@ -29,10 +33,8 @@ def fetch_rss_feed(url: str) -> str:
         print("Failed")
         return ""
 
-def parse_rss_xml(content: str) -> None:
+def rss_xml_to_dict(content: str, newsfeeds:dict={}) -> dict:
     root = ET.fromstring(content)
-
-    newsfeeds = {}
     title = root.findtext("./channel/title")
     newsfeeds[title] = []
     for item in root.findall("./channel/item"):
@@ -40,36 +42,31 @@ def parse_rss_xml(content: str) -> None:
         for child in item:
             newsfeed[child.tag] = child.text
         newsfeeds[title].append(newsfeed)
-    for nf in newsfeeds[title]:
-        if "title" in nf:
-            print(nf["title"])
-        if "description" in nf:
-            print(nf["description"])
-        if "guid" in nf:
-            print(nf["guid"])
-        if "pubDate" in nf:
-            print(nf["pubDate"])
-        print()
+    return newsfeeds
 
+def load_rss_feeds_list(csvfile: str) -> list:
+    feed_list = read_from_csv(csvfile)
+    print(feed_list)
+    return feed_list
+
+def download_rss_feeds(rss_urls: list) -> list[str]:
+    rss_xml = []
+    for url in rss_urls:
+        rss_xml.append(fetch_rss_feed(url))
+    return rss_xml
 
 def main():
-    parser = argparse.ArgumentParser(description="PyRSS Manager")
-    parser.add_argument("--file", nargs="?", default="database.csv")
-    parser.add_argument("action", choices=["add", "delete", "list"])
-    parser.add_argument
-    args = parser.parse_args()
-    db = args.file.lower()
-    data = ["Sports Illustrated", "https://www.sportsillustrated.com"]
-
-    if args.action.lower() == "add":
-        save_to_csv(db, data)
-    elif args.action.lower() == "list":
-        read_from_csv(db)
-    else:
-        print("Unknow action")
-        return
+    feeds_database = "./rssfeeds.csv"
+    rss_feeds = load_rss_feeds_list(feeds_database)
+    rss_xml = download_rss_feeds(rss_feeds)
+    newsfeeds = {}
+    for xml in rss_xml:
+        rss_xml_to_dict(xml, newsfeeds)
+        
+    for newsfeed in newsfeeds:
+        print(newsfeed)
 
 
 if __name__ == "__main__":
-    content = fetch_rss_feed("https://www.rssboard.org/files/sample-rss-2.xml")
-    parse_rss_xml(content)
+    main()
+
