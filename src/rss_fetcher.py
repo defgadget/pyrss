@@ -8,3 +8,11 @@ def get_rss_feed(url: str) -> str:
 
     body = resp.text
     return body
+
+
+def get_multi_rss_feeds(urls: list[str]) -> list[str]:
+    raw_feeds = []
+    for url in urls:
+        raw_feed = get_rss_feed(url)
+        raw_feeds.append(raw_feed)
+    return raw_feeds

@@ -1,14 +1,20 @@
 import rss_fetcher
-import rss_parser
+from articles_repo import InFileArticlesRepo
+from rss_parser import RSSParser
 
 
 def main():
     xml = rss_fetcher.get_rss_feed(
         "https://cyber.harvard.edu/rss/examples/rss2sample.xml"
     )
-    rss = rss_parser.parse_rss_feed(xml)
-    print(rss["feed name"])
+    parser = RSSParser()
+    rss = parser.parse_rss_feed(xml)
+    print(rss["publisher"])
     print(rss["articles"])
+
+    db = InFileArticlesRepo("./test/testdb.csv")
+    db.save(rss["articles"])
+    db.save(rss["articles"])
 
 
 if __name__ == "__main__":
