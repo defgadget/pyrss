@@ -9,12 +9,18 @@ def main():
     )
     parser = RSSParser()
     rss = parser.parse_rss_feed(xml)
-    print(rss["publisher"])
-    print(rss["articles"])
 
     db = InFileArticlesRepo("./test/testdb.csv")
-    db.save(rss["articles"])
-    db.save(rss["articles"])
+    db.write([rss])
+    article = {"id": "1"}
+    db.mark_read(article)
+    article2 = {"id": "2"}
+    db.mark_read(article2)
+    all_articles = db.get_all()
+    unread_articles = db.get_unread()
+
+    print(len(all_articles))
+    print(len(unread_articles))
 
 
 if __name__ == "__main__":
