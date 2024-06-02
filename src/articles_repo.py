@@ -74,8 +74,9 @@ class InFileArticlesRepo:
             writer = csv.DictWriter(db, fieldnames=self.fieldnames)
             for rss in rss_list:
                 publisher = rss["publisher"]
-                for i, article in enumerate(rss["articles"], start=1):
-                    article["id"] = i + id_count
+                for article in rss["articles"]:
+                    id_count = 1 + id_count
+                    article["id"] = id_count
                     article["publisher"] = publisher
                     article["is_read"] = False
                     writer.writerow(article)

@@ -10,9 +10,9 @@ def get_rss_feed(url: str) -> str:
     return body
 
 
-def get_multi_rss_feeds(urls: list[str]) -> list[str]:
+def get_multi_rss_feeds(feeds: list[dict]) -> list[str]:
     raw_feeds = []
-    for url in urls:
-        raw_feed = get_rss_feed(url)
+    for feed in feeds:
+        raw_feed = get_rss_feed(feed["url"])
         raw_feeds.append(raw_feed)
     return raw_feeds

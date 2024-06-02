@@ -6,6 +6,7 @@ class InFileRSSFeedsRepo:
     def __init__(self, path: str):
         dir, _ = os.path.split(path)
         if not os.path.exists(dir):
+            print("dir doesn't exist")
             os.makedirs(dir)
         if not os.path.exists(path):
             f = open(path, "x")

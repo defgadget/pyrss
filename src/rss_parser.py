@@ -10,6 +10,7 @@ class RSSParser:
             self.includes = includes
 
     def parse_rss_feed(self, xml: str) -> dict:
+        xml = xml.strip()
         root = ET.fromstring(xml)
 
         rss_info = {}
@@ -24,12 +25,14 @@ class RSSParser:
                 article = {}
                 for each in item.findall("./*"):
                     if each.tag in self.includes:
-                        value = each.text
-                        if each.tag == "pubDate" and value is not None:
-                            formatted_date = datetime.strptime(
-                                value, "%a, %d %b %Y %I:%M:%S %Z"
-                            ).strftime("%Y-%m-%d")
-                            value = formatted_date
+                        value = ""
+                        if each.text is not None:
+                            value = each.text.strip()
+                            if each.tag == "pubDate" and value is not None:
+                                # formatted_date = datetime.strptime(
+                                #     value, "%a, %d %b %Y %I:%M:%S %Z"
+                                # ).strftime("%Y-%m-%d")
+                                value = each.text.strip()
                         article[each.tag] = value
                 articles.append(article)
 
